@@ -20,22 +20,40 @@
 
 /* jshint esversion: 6 */
 
-(function () {
+(function (window, undefined) {
     "use strict";
+
+    function getLocalDateTuple(date) {
+        return [date.getFullYear(), date.getMonth(), date.getDate()];
+    }
+
+    function getUTCDateTuple(date) {
+        return [date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()];
+    }
+
+    function getDatePart(getDateTupleFunc, date, dateBoundaryMinute) {
+        if (dateBoundaryMinute === undefined) {
+            dateBoundaryMinute = 0;
+        }
+
+        var dateOffset = new Date(date);
+        dateOffset.setMinutes(dateOffset.getMinutes() - dateBoundaryMinute);
+        return new Date(Date.UTC.apply(Date, getDateTupleFunc(dateOffset)));
+    }
 
     var dateBoundary = {
         getLocalDatePart: function (date, dateBoundaryMinute) {
-            if (dateBoundaryMinute === undefined) {
-                dateBoundaryMinute = 0;
-            }
+            return getDatePart(getLocalDateTuple, date, dateBoundaryMinute);
+        },
 
-            var dateOffset = new Date(date);
-            dateOffset.setMinutes(dateOffset.getMinutes() - dateBoundaryMinute);
-            return new Date(Date.UTC(dateOffset.getFullYear(), dateOffset.getMonth(), dateOffset.getDate()));
+        getUTCDatePart: function (date, dateBoundaryMinute) {
+            return getDatePart(getUTCDateTuple, date, dateBoundaryMinute);
         }
     };
 
     if (window.DateBoundary === undefined) {
         window.DateBoundary = dateBoundary;
     }
-})();
+
+    return dateBoundary;
+})(typeof window !== "undefined" ? window : this);
