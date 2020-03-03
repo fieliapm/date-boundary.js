@@ -23,6 +23,16 @@
 (function (window, undefined) {
     "use strict";
 
+    function adjustDateBoundary(date, dateBoundaryMinutes) {
+        if (dateBoundaryMinutes === undefined) {
+            dateBoundaryMinutes = 0;
+        }
+
+        var dateCopy = new Date(date);
+        dateCopy.setMinutes(dateCopy.getMinutes() - dateBoundaryMinutes);
+        return dateCopy;
+    }
+
     function getLocalDateTuple(date) {
         return [date.getFullYear(), date.getMonth(), date.getDate()];
     }
@@ -31,23 +41,18 @@
         return [date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()];
     }
 
-    function getDatePart(getDateTupleFunc, date, dateBoundaryMinute) {
-        if (dateBoundaryMinute === undefined) {
-            dateBoundaryMinute = 0;
-        }
-
-        var dateOffset = new Date(date);
-        dateOffset.setMinutes(dateOffset.getMinutes() - dateBoundaryMinute);
+    function getDatePart(getDateTupleFunc, date, dateBoundaryMinutes) {
+        var dateOffset = adjustDateBoundary(date, dateBoundaryMinutes);
         return new Date(Date.UTC.apply(Date, getDateTupleFunc(dateOffset)));
     }
 
     var dateBoundary = {
-        getLocalDatePart: function (date, dateBoundaryMinute) {
-            return getDatePart(getLocalDateTuple, date, dateBoundaryMinute);
+        getLocalDatePart: function (date, dateBoundaryMinutes) {
+            return getDatePart(getLocalDateTuple, date, dateBoundaryMinutes);
         },
 
-        getUTCDatePart: function (date, dateBoundaryMinute) {
-            return getDatePart(getUTCDateTuple, date, dateBoundaryMinute);
+        getUTCDatePart: function (date, dateBoundaryMinutes) {
+            return getDatePart(getUTCDateTuple, date, dateBoundaryMinutes);
         }
     };
 
