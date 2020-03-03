@@ -28,9 +28,14 @@
             dateBoundaryMinutes = 0;
         }
 
-        var dateCopy = new Date(date);
-        dateCopy.setMinutes(dateCopy.getMinutes() - dateBoundaryMinutes);
-        return dateCopy;
+        var dateOffset = new Date(date);
+        dateOffset.setMinutes(dateOffset.getMinutes() - dateBoundaryMinutes);
+        return dateOffset;
+    }
+
+    function extractDateTuple(getDateTupleFunc, date, dateBoundaryMinutes) {
+        var dateOffset = adjustDateBoundary(date, dateBoundaryMinutes);
+        return getDateTupleFunc(dateOffset);
     }
 
     function getLocalDateTuple(date) {
@@ -41,18 +46,30 @@
         return [date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()];
     }
 
-    function getDatePart(getDateTupleFunc, date, dateBoundaryMinutes) {
-        var dateOffset = adjustDateBoundary(date, dateBoundaryMinutes);
-        return new Date(Date.UTC.apply(Date, getDateTupleFunc(dateOffset)));
+    function newUTCDate(dateTuple) {
+        return new Date(Date.UTC.apply(Date, dateTuple));
+    }
+
+    function extractDateMidnight(getDateTupleFunc, date, dateBoundaryMinutes) {
+        var dateTuple = extractDateTuple(getDateTupleFunc, date, dateBoundaryMinutes);
+        return newUTCDate(dateTuple);
     }
 
     var dateBoundary = {
-        getLocalDatePart: function (date, dateBoundaryMinutes) {
-            return getDatePart(getLocalDateTuple, date, dateBoundaryMinutes);
+        extractLocalDateTuple: function (date, dateBoundaryMinutes) {
+            return extractDateTuple(getLocalDateTuple, date, dateBoundaryMinutes);
         },
 
-        getUTCDatePart: function (date, dateBoundaryMinutes) {
-            return getDatePart(getUTCDateTuple, date, dateBoundaryMinutes);
+        extractUTCDateTuple: function (date, dateBoundaryMinutes) {
+            return extractDateTuple(getUTCDateTuple, date, dateBoundaryMinutes);
+        },
+
+        extractLocalDateMidnight: function (date, dateBoundaryMinutes) {
+            return extractDateMidnight(getLocalDateTuple, date, dateBoundaryMinutes);
+        },
+
+        extractUTCDateMidnight: function (date, dateBoundaryMinutes) {
+            return extractDateMidnight(getUTCDateTuple, date, dateBoundaryMinutes);
         }
     };
 
